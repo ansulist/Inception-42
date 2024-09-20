@@ -1,0 +1,11 @@
+services:
+  mdb:
+    container_name: mariadb
+    build: ./requirements/mariadb
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - network
+    restart: always
+    env_file:
+      - .env
