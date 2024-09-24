@@ -9,3 +9,16 @@ services:
     restart: always
     env_file:
       - .env
+
+  wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - network
+    restart : always
+    env_file:
+      - .env
+    depends_on:
+      - mariadb

@@ -17,4 +17,3 @@ RUN mkdir -p /var/run/mysqld \
 # make the directory for the mariadb
 # setting proper ownership to the user and group. 
 # then setting the permission to be full read, write and execute on the directory
-EXPOSE 3306
