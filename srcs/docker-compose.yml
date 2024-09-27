@@ -21,4 +21,35 @@ services:
     env_file:
       - .env
     depends_on:
-      - mariadb
+      - mdb
+
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx
+    ports:
+      - 443:443
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - network
+    restart : always
+    depends_on:
+      - wordpress
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/kunyit/data/mysql
+      o: bind
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/kunyit/data/wordpress
+      o: bind
+
+networks:
+  network:
+    driver: bridge 

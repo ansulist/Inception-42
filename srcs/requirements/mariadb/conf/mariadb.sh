@@ -1,3 +1,5 @@
+#!/bin/bash
+
 check_db_exists() {
     [ -d "/var/lib/mysql/$MYSQL_DATABASE" ] && return 0 || return 1
 }
