@@ -9,8 +9,8 @@ RUN mkdir -p /etc/nginx/ssl
 
 # Generate a self-signed SSL certificate (valid for 365 days)
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/nginx/ssl/nginx.key \
-    -out /etc/nginx/ssl/nginx.crt \
+    -keyout /etc/nginx/ssl/ansulist.key \
+    -out /etc/nginx/ssl/ansulist.crt \
     -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
 
 # Copy custom NGINX configuration file for TLSv1.2 and TLSv1.3

@@ -1,15 +1,18 @@
 #!/bin/bash
 
-check_db_exists() {
-    [ -d "/var/lib/mysql/$MYSQL_DATABASE" ] && return 0 || return 1
-}
+# Start the MariaDB server using mysqld_safe in the background
+mysqld_safe --datadir='/var/lib/mysql' &
 
-# Start the MariaDB service
-/etc/init.d/mysql start
+# Wait for MariaDB to be ready before proceeding
+while ! mysqladmin ping --silent; do
+    sleep 1
+done
 
-# Check if database exists, if not, set up the database
-if check_db_exists; then
-    echo "Database exists, skipping creation."
+# Check if the WordPress database already exists
+DB_EXISTS=$(echo "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$MYSQL_DATABASE';" | mysql -uroot -s -N)
+
+if [ "$DB_EXISTS" == "$MYSQL_DATABASE" ]; then
+    echo "Database '$MYSQL_DATABASE' already exists, skipping creation."
 else
     # Grant root access from any host
     echo "Granting root access from any host..."
@@ -18,17 +21,14 @@ else
     # Create the WordPress database and user
     echo "Creating database '$MYSQL_DATABASE' and user '$MYSQL_USER'..."
     echo "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE; \
-          GRANT ALL ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; \
-          FLUSH PRIVILEGES;" | mysql -uroot
-
-    # Import WordPress database schema if the SQL file is available
-    [ -f "/usr/local/bin/wordpress.sql" ] && \
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /usr/local/bin/wordpress.sql || \
-    echo "No WordPress SQL file found."
+            GRANT ALL ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; \
+            FLUSH PRIVILEGES;" | mysql -uroot
 fi
 
-# Stop the MariaDB service (optional if not needed immediately)
-/etc/init.d/mysql stop
+# Import WordPress database schema if the SQL file is available
+# [ -f "/usr/local/bin/wordpress.sql" ] && \
+# mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /usr/local/bin/wordpress.sql || \
+# echo "No WordPress SQL file found."
 
-# Execute the command passed to the script (if any)
-exec "$@"
+# Keep the container running by running mysqld_safe in the foreground
+wait

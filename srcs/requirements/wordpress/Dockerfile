@@ -15,25 +15,23 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp
 
-# Copy the PHP-FPM configuration to the correct directory
-# Adjust the version to match the installed PHP version (likely 7.4 or 8.x)
-
 # Create directory for PHP-FPM to store its socket
 RUN mkdir /run/php
 
-# Copy the wordpress.sh file into the image
-COPY ./conf/wordpress.sh /usr/local/bin/wordpress.sh
+# Ensure /var/www/html exists
+RUN mkdir -p /var/www/html && \
+    chown -R www-data:www-data /var/www/html
 
-# Copy the WordPress setup script and make it executable
+# Set correct ownership for the directory to avoid permission issues
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
+# Copy the wordpress.sh file into the image and make it executable
+COPY ./conf/wordpress.sh /usr/local/bin/wordpress.sh
 RUN chmod +x /usr/local/bin/wordpress.sh
 
 # Set up the entrypoint for WordPress installation or setup tasks
 ENTRYPOINT ["/usr/local/bin/wordpress.sh"]
 
-WORKDIR /var/www/html/
-
 #We expose the 9000 port
-EXPOSE 9000
-
-# Start PHP-FPM in the foreground
-CMD ["/usr/sbin/php-fpm7.4", "-F"]
+# EXPOSE 9000

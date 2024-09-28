@@ -10,12 +10,13 @@ RUN mkdir -p /var/run/mysqld && \
     chown -R mysql:mysql /var/run/mysqld && \
     chmod 775 /var/run/mysqld
 
+# RUN sed -i "s/127.0.0.1/0.0.0.0/" /etc/mysql/mariadb.conf.d/50-server.cnf
 # Copy the mariadb.sh script into the container
 COPY ./conf/mariadb.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/mariadb.sh
 
-# Use mariadb.sh as the entry point to start the container
-ENTRYPOINT [ "/usr/local/bin/mariadb.sh" ]
+# Copy the wordpress.sql file into the container
+# COPY ../wordpress/conf/wordpress.sql /usr/local/bin/wordpress.sql
 
-# CMD is optional if your entrypoint handles the startup
-CMD ["mysqld", "--bind-address=0.0.0.0"]
+# Setup everything and run the mariadb server
+ENTRYPOINT [ "/usr/local/bin/mariadb.sh" ]
